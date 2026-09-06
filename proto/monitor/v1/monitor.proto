@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package monitor.v1;
+
+option go_package = "ubi/proto/monitor/v1";
+
+import "google/protobuf/timestamp.proto";
+
+enum DeviceProtocol {
+  DEVICE_PROTOCOL_UNSPECIFIED = 0;
+  DEVICE_PROTOCOL_GRPC = 1;
+  DEVICE_PROTOCOL_REST = 2;
+}
+
+enum DeviceStatus {
+  DEVICE_STATUS_UNSPECIFIED = 0;
+  DEVICE_STATUS_UP = 1;
+  DEVICE_STATUS_DOWN = 2;
+  DEVICE_STATUS_DEGRADED = 3;
+}
+
+message Device {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+  DeviceProtocol protocol = 4;
+  DeviceStatus status = 5;
+  google.protobuf.Timestamp last_checked = 6;
+  repeated string capabilities = 7;
+}
+
+message Diagnostics {
+  string device_id = 1;
+  string hardware_version = 2;
+  string software_version = 3;
+  string firmware_version = 4;
+  DeviceStatus status = 5;
+  string checksum = 6;
+  google.protobuf.Timestamp collected_at = 7;
+}
+
+message ListDevicesRequest {}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+}
+
+message GetDeviceRequest {
+  string device_id = 1;
+}
+
+message GetDeviceResponse {
+  Device device = 1;
+}
+
+message GetDiagnosticsRequest {
+  string device_id = 1;
+}
+
+message GetDiagnosticsResponse {
+  Diagnostics diagnostics = 1;
+}
+
+message AddDeviceRequest {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+  DeviceProtocol protocol = 4;
+}
+
+message AddDeviceResponse {
+  Device device = 1;
+}
+
+message RemoveDeviceRequest {
+  string device_id = 1;
+}
+
+message RemoveDeviceResponse {}
+
+// Device-facing diagnostics service. gRPC devices that want to expose
+// diagnostics implement this convention and advertise it via the standard
+// gRPC health service (service name "device.Diagnostics").
+message CollectDiagnosticsRequest {}
+
+message CollectDiagnosticsResponse {
+  string hardware_version = 1;
+  string software_version = 2;
+  string firmware_version = 3;
+  DeviceStatus status = 4;
+  string checksum = 5;
+}
+
+service DeviceDiagnostics {
+  rpc Collect(CollectDiagnosticsRequest) returns (CollectDiagnosticsResponse);
+}
+
+service MonitorService {
+  rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
+  rpc GetDevice(GetDeviceRequest) returns (GetDeviceResponse);
+  rpc GetDiagnostics(GetDiagnosticsRequest) returns (GetDiagnosticsResponse);
+  rpc AddDevice(AddDeviceRequest) returns (AddDeviceResponse);
+  rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceResponse);
+}

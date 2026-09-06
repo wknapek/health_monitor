@@ -1,0 +1,19 @@
+# Build output
+/bin/
+/dist/
+
+# Test & coverage artifacts
+*.test
+*.out
+coverage.*
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Local overrides
+/configs/*.local.yaml

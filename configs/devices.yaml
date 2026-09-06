@@ -1,0 +1,23 @@
+server:
+  grpc_addr: ":9090"
+  rest_addr: ":8080"
+
+collector:
+  interval: 30s
+  grpc_timeout: 5s
+  rest_timeout: 5s
+  max_concurrent: 10
+
+devices:
+  - id: switch-01
+    name: Core Switch 01
+    address: 192.168.1.10:50051
+    protocol: grpc
+  - id: router-01
+    name: Edge Router 01
+    address: 192.168.1.20:8080
+    protocol: rest
+  - id: ap-01
+    name: Access Point 01
+    address: 192.168.1.30:8080
+    protocol: rest
