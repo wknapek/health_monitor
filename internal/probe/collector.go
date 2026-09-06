@@ -13,7 +13,7 @@ import (
 )
 
 type Collector struct {
-	store     *store.Store
+	store     store.Storage
 	grpcProbe *grpcProbe
 	restProbe *restProbe
 	interval  time.Duration
@@ -21,7 +21,7 @@ type Collector struct {
 	logger    *slog.Logger
 }
 
-func NewCollector(st *store.Store, cfg config.CollectorConfig, logger *slog.Logger) *Collector {
+func NewCollector(st store.Storage, cfg config.CollectorConfig, logger *slog.Logger) *Collector {
 	return &Collector{
 		store:     st,
 		grpcProbe: newGRPCProbe(cfg.GRPCTimeout, logger),

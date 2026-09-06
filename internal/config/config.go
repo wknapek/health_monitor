@@ -13,11 +13,17 @@ type Config struct {
 	Server    ServerConfig    `yaml:"server"`
 	Collector CollectorConfig `yaml:"collector"`
 	Devices   []DeviceConfig  `yaml:"devices"`
+	DBConfig  DBConfig        `yaml:"db"`
 }
 
 type ServerConfig struct {
 	GRPCAddr string `yaml:"grpc_addr"`
 	RESTAddr string `yaml:"rest_addr"`
+}
+
+type DBConfig struct {
+	Driver string `yaml:"driver"`
+	DSN    string `yaml:"dsn"`
 }
 
 type CollectorConfig struct {

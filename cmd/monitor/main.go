@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"ubi/internal/config"
 	"ubi/internal/model"
@@ -42,11 +44,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	db, err := gorm.Open(postgres.Open(cfg.DBConfig.DSN), &gorm.Config{})
+	if err != nil {
+		logger.Error("failed to open database", "error", err)
+		os.Exit(1)
+	}
+
 	logger.Info("starting device monitor",
 		"version", version, "commit", commit, "built", date,
 		"grpc", cfg.Server.GRPCAddr, "rest", cfg.Server.RESTAddr)
 
-	st := store.New()
+	st := store.NewStoreDB(db)
+	if err := st.AutoMigrate(); err != nil {
+		logger.Error("failed to migrate database schema", "error", err)
+		os.Exit(1)
+	}
 
 	// Seed initial devices from config.
 	for _, d := range cfg.Devices {

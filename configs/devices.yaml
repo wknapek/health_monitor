@@ -8,6 +8,10 @@ collector:
   rest_timeout: 5s
   max_concurrent: 10
 
+db:
+  driver: postgres
+  dsn: "host=localhost user=monitor password=monitor dbname=monitor port=5432 sslmode=disable"
+
 devices:
   - id: switch-01
     name: Core Switch 01
