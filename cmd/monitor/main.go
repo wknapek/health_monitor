@@ -16,6 +16,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"ubi/internal/checksum"
 	"ubi/internal/config"
 	"ubi/internal/model"
 	"ubi/internal/probe"
@@ -49,6 +50,7 @@ func main() {
 		logger.Error("failed to open database", "error", err)
 		os.Exit(1)
 	}
+	checksumCtr := checksum.NewChecksumController()
 
 	logger.Info("starting device monitor",
 		"version", version, "commit", commit, "built", date,
@@ -75,7 +77,7 @@ func main() {
 	svc := service.New(st, logger)
 
 	// Background collector.
-	collector := probe.NewCollector(st, cfg.Collector, logger)
+	collector := probe.NewCollector(st, cfg.Collector, logger, checksumCtr)
 	collectorCtx, cancelCollector := context.WithCancel(context.Background())
 	defer cancelCollector()
 	go collector.Run(collectorCtx)

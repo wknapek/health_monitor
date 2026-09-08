@@ -58,10 +58,11 @@ func (s *StoreDB) ListDevices() []*model.Device {
 func (s *StoreDB) UpdateDeviceStatus(id string, status pb.DeviceStatus, caps []string) {
 	s.db.Model(&model.Device{}).
 		Where("id = ?", id).
-		Updates(map[string]any{
-			"status":       status,
-			"last_checked": time.Now(),
-			"capabilities": caps,
+		Select("status", "last_checked", "capabilities").
+		Updates(&model.Device{
+			Status:       status,
+			LastChecked:  time.Now(),
+			Capabilities: caps,
 		})
 }
 

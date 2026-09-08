@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"ubi/internal/checksum"
 	"ubi/internal/config"
 	"ubi/internal/model"
 	"ubi/internal/store"
@@ -13,22 +14,24 @@ import (
 )
 
 type Collector struct {
-	store     store.Storage
-	grpcProbe *grpcProbe
-	restProbe *restProbe
-	interval  time.Duration
-	maxConc   int
-	logger    *slog.Logger
+	store       store.Storage
+	grpcProbe   *grpcProbe
+	restProbe   *restProbe
+	interval    time.Duration
+	maxCon      int
+	logger      *slog.Logger
+	checksumCtr checksum.Checksum
 }
 
-func NewCollector(st store.Storage, cfg config.CollectorConfig, logger *slog.Logger) *Collector {
+func NewCollector(st store.Storage, cfg config.CollectorConfig, logger *slog.Logger, check checksum.Checksum) *Collector {
 	return &Collector{
-		store:     st,
-		grpcProbe: newGRPCProbe(cfg.GRPCTimeout, logger),
-		restProbe: newRESTProbe(cfg.RESTTimeout, logger),
-		interval:  cfg.Interval,
-		maxConc:   cfg.MaxConcurrent,
-		logger:    logger,
+		store:       st,
+		grpcProbe:   newGRPCProbe(cfg.GRPCTimeout, logger),
+		restProbe:   newRESTProbe(cfg.RESTTimeout, logger),
+		interval:    cfg.Interval,
+		maxCon:      cfg.MaxConcurrent,
+		logger:      logger,
+		checksumCtr: check,
 	}
 }
 
@@ -58,7 +61,7 @@ func (c *Collector) ProbeAll(ctx context.Context) {
 	}
 	c.logger.Info("probe cycle started", "devices", len(devices))
 
-	sem := make(chan struct{}, c.maxConc)
+	sem := make(chan struct{}, c.maxCon)
 	var wg sync.WaitGroup
 
 	for _, d := range devices {
